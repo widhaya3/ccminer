@@ -81,7 +81,6 @@ static int nextPerm(uint8_t n[], int count)
 
 	if (count <= 1)
 		return 0;
-
 	for (i = count - 1; i>0 && n[i - 1] >= n[i]; i--);
 	tail = i;
 
@@ -89,7 +88,6 @@ static int nextPerm(uint8_t n[], int count)
 		for (j = count - 1; j>tail && n[j] <= n[tail - 1]; j--);
 		swap8(&n[tail - 1], &n[j]);
 	}
-
 	for (i = tail, j = count - 1; i<j; i++, j--)
 		swap8(&n[i], &n[j]);
 
@@ -102,19 +100,71 @@ static void getAlgoString(char *str, int seq)
 	char *sptr;
 
 	initPerm(algoList, HASH_FUNC_COUNT);
-
 	for (int k = 0; k < seq; k++) {
 		nextPerm(algoList, HASH_FUNC_COUNT);
 	}
 
 	sptr = str;
-	for (int j = 0; j < HASH_FUNC_COUNT; j++) {
+
+	/*for (int j = 0; j < HASH_FUNC_COUNT; j++) {
 		if (algoList[j] >= 10)
 			sprintf(sptr, "%c", 'A' + (algoList[j] - 10));
 		else
 			sprintf(sptr, "%u", (uint32_t) algoList[j]);
 		sptr++;
-	}
+	}*/
+
+	if (algoList[0] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[0] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[0]);
+	sptr++;
+	if (algoList[1] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[1] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[1]);
+	sptr++;
+	if (algoList[2] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[2] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[2]);
+	sptr++;
+	if (algoList[3] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[3] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[3]);
+	sptr++;
+	if (algoList[4] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[4] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[4]);
+	sptr++;
+	if (algoList[5] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[5] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[5]);
+	sptr++;
+	if (algoList[6] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[6] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[6]);
+	sptr++;
+	if (algoList[7] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[7] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[7]);
+	sptr++;
+	if (algoList[8] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[8] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[8]);
+	sptr++;
+	if (algoList[9] >= 10)
+		sprintf(sptr, "%c", 'A' + (algoList[9] - 10));
+	else
+		sprintf(sptr, "%u", (uint32_t)algoList[9]);
+	sptr++;
+
 	*sptr = '\0';
 }
 
@@ -169,7 +219,6 @@ extern "C" void timetravel10_hash(void *output, const void *input)
 	int size = 80;
 
 	const int hashes = (int) strlen(hashOrder);
-
 	for (int i = 0; i < hashes; i++)
 	{
 		const char elem = hashOrder[i];
@@ -346,8 +395,30 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 	}
 
 	uint32_t endiandata[20];
-	for (int k=0; k < 19; k++)
-		be32enc(&endiandata[k], pdata[k]);
+
+	//for (int k=0; k < 19; k++)
+	//	be32enc(&endiandata[k], pdata[k]);
+
+	be32enc(&endiandata[0], pdata[0]);
+	be32enc(&endiandata[1], pdata[1]);
+	be32enc(&endiandata[2], pdata[2]);
+	be32enc(&endiandata[3], pdata[3]);
+	be32enc(&endiandata[4], pdata[4]);
+	be32enc(&endiandata[5], pdata[5]);
+	be32enc(&endiandata[6], pdata[6]);
+	be32enc(&endiandata[7], pdata[7]);
+	be32enc(&endiandata[8], pdata[8]);
+	be32enc(&endiandata[9], pdata[9]);
+	be32enc(&endiandata[10], pdata[10]);
+	be32enc(&endiandata[11], pdata[11]);
+	be32enc(&endiandata[12], pdata[12]);
+	be32enc(&endiandata[13], pdata[13]);
+	be32enc(&endiandata[14], pdata[14]);
+	be32enc(&endiandata[15], pdata[15]);
+	be32enc(&endiandata[16], pdata[16]);
+	be32enc(&endiandata[17], pdata[17]);
+	be32enc(&endiandata[18], pdata[18]);
+
 
 	cuda_check_cpu_setTarget(ptarget);
 
@@ -432,7 +503,6 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 				TRACE("cube 80:");
 				break;
 		}
-
 		for (int i = 1; i < hashes; i++)
 		{
 			const char elem = hashOrder[i];
