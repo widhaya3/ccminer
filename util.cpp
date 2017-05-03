@@ -2252,6 +2252,9 @@ void print_hash_tests(void)
 	timetravel_hash(&hash[0], &buf[0]);
 	printpfx("timetravel", hash);
 
+	timetravel10_hash(&hash[0], &buf[0]);
+	printpfx("timetravel10", hash);
+
 	blake256hash(&hash[0], &buf[0], 8);
 	printpfx("vanilla", hash);
 

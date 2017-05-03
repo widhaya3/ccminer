@@ -115,6 +115,7 @@ its command line interface and options.
                           skein       use to mine Skeincoin
                           skein2      use to mine Woodcoin
                           timetravel  use to mine MachineCoin
+			  timetravel10 use to mine BitCore
                           x11evo      use to mine Revolver
                           x11         use to mine DarkCoin
                           x14         use to mine X14Coin
