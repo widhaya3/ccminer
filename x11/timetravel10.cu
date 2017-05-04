@@ -20,11 +20,9 @@ extern "C" {
 #include "sph/sph_keccak.h"
 #include "sph/sph_luffa.h"
 #include "sph/sph_cubehash.h"
-#if HASH_FUNC_COUNT > 8
 #include "sph/sph_shavite.h"
 #include "sph/sph_simd.h"
 #include "sph/sph_echo.h"
-#endif
 }
 
 #include "miner.h"
@@ -42,11 +40,9 @@ enum Algo {
 	KECCAK,
 	LUFFA,
 	CUBEHASH,
-#if HASH_FUNC_COUNT > 8
 	SHAVITE,
 	SIMD,
 	ECHO,
-#endif
 	MAX_ALGOS_COUNT
 };
 
@@ -105,14 +101,6 @@ static void getAlgoString(char *str, int seq)
 	}
 
 	sptr = str;
-
-	/*for (int j = 0; j < HASH_FUNC_COUNT; j++) {
-		if (algoList[j] >= 10)
-			sprintf(sptr, "%c", 'A' + (algoList[j] - 10));
-		else
-			sprintf(sptr, "%u", (uint32_t) algoList[j]);
-		sptr++;
-	}*/
 
 	if (algoList[0] >= 10)
 		sprintf(sptr, "%c", 'A' + (algoList[0] - 10));
@@ -203,11 +191,9 @@ extern "C" void timetravel10_hash(void *output, const void *input)
 	sph_keccak512_context    ctx_keccak;
 	sph_luffa512_context     ctx_luffa1;
 	sph_cubehash512_context  ctx_cubehash1;
-#if HASH_FUNC_COUNT > 8
 	sph_shavite512_context   ctx_shavite1;
 	sph_simd512_context      ctx_simd1;
 	sph_echo512_context      ctx_echo1;
-#endif
 
 	if (s_sequence == UINT32_MAX) {
 		uint32_t *data = (uint32_t*) input;
@@ -271,7 +257,6 @@ extern "C" void timetravel10_hash(void *output, const void *input)
 			sph_cubehash512(&ctx_cubehash1, in, size);
 			sph_cubehash512_close(&ctx_cubehash1, hash);
 			break;
-#if HASH_FUNC_COUNT > 8
 		case SHAVITE:
 			sph_shavite512_init(&ctx_shavite1);
 			sph_shavite512(&ctx_shavite1, in, size);
@@ -287,7 +272,6 @@ extern "C" void timetravel10_hash(void *output, const void *input)
 			sph_echo512(&ctx_echo1, in, size);
 			sph_echo512_close(&ctx_echo1, hash);
 			break;
-#endif
 		}
 	}
 
@@ -298,11 +282,12 @@ static uint32_t get_next_time(uint32_t ntime, char* curOrder)
 {
 	char nextOrder[HASH_FUNC_COUNT + 1] = { 0 };
 	uint32_t secs = 15;
-	do {
-		uint32_t nseq = getCurrentAlgoSeq(ntime+secs);
+	while (curOrder[0] == nextOrder[0])
+	{
+		uint32_t nseq = getCurrentAlgoSeq(ntime + secs);
 		getAlgoString(nextOrder, nseq);
 		secs += 15;
-	} while (curOrder[0] == nextOrder[0]);
+	}
 	return secs;
 }
 
@@ -379,13 +364,12 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 		qubit_luffa512_cpu_init(thr_id, throughput); // only constants (480 bytes)
 		x11_luffa512_cpu_init(thr_id, throughput);
 		x11_cubehash512_cpu_init(thr_id, throughput);
-#if HASH_FUNC_COUNT > 8
 		x11_shavite512_cpu_init(thr_id, throughput);
 		x11_echo512_cpu_init(thr_id, throughput);
 		if (x11_simd512_cpu_init(thr_id, throughput) != 0) {
 			return 0;
 		}
-#endif
+
 		CUDA_CALL_OR_RET_X(cudaMalloc(&d_hash[thr_id], (size_t) 64 * throughput), -1);
 		CUDA_CALL_OR_RET_X(cudaMemset(d_hash[thr_id], 0, (size_t) 64 * throughput), -1);
 
@@ -395,9 +379,6 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 	}
 
 	uint32_t endiandata[20];
-
-	//for (int k=0; k < 19; k++)
-	//	be32enc(&endiandata[k], pdata[k]);
 
 	be32enc(&endiandata[0], pdata[0]);
 	be32enc(&endiandata[1], pdata[1]);
@@ -464,44 +445,45 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 		}
 	}
 
-	do {
+	while (!work_restart[thr_id].restart)
+	{
 		int order = 0;
 
 		// Hash with CUDA
 
 		switch (algo80) {
-			case BLAKE:
-				quark_blake512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
-				TRACE("blake80:");
-				break;
-			case BMW:
-				quark_bmw512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id], order++);
-				TRACE("bmw80  :");
-				break;
-			case GROESTL:
-				groestl512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
-				TRACE("grstl80:");
-				break;
-			case SKEIN:
-				skein512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id], 1); order++;
-				TRACE("skein80:");
-				break;
-			case JH:
-				jh512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
-				TRACE("jh51280:");
-				break;
-			case KECCAK:
-				keccak512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
-				TRACE("kecck80:");
-				break;
-			case LUFFA:
-				qubit_luffa512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id], order++);
-				TRACE("luffa80:");
-				break;
-			case CUBEHASH:
-				cubehash512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
-				TRACE("cube 80:");
-				break;
+		case BLAKE:
+			quark_blake512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
+			TRACE("blake80:");
+			break;
+		case BMW:
+			quark_bmw512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id], order++);
+			TRACE("bmw80  :");
+			break;
+		case GROESTL:
+			groestl512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
+			TRACE("grstl80:");
+			break;
+		case SKEIN:
+			skein512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id], 1); order++;
+			TRACE("skein80:");
+			break;
+		case JH:
+			jh512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
+			TRACE("jh51280:");
+			break;
+		case KECCAK:
+			keccak512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
+			TRACE("kecck80:");
+			break;
+		case LUFFA:
+			qubit_luffa512_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id], order++);
+			TRACE("luffa80:");
+			break;
+		case CUBEHASH:
+			cubehash512_cuda_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]); order++;
+			TRACE("cube 80:");
+			break;
 		}
 		for (int i = 1; i < hashes; i++)
 		{
@@ -541,7 +523,6 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 				x11_cubehash512_cpu_hash_64(thr_id, throughput, pdata[19], NULL, d_hash[thr_id], order++);
 				TRACE("cube   :");
 				break;
-#if HASH_FUNC_COUNT > 8
 			case SHAVITE:
 				x11_shavite512_cpu_hash_64(thr_id, throughput, pdata[19], NULL, d_hash[thr_id], order++);
 				TRACE("shavite:");
@@ -554,7 +535,6 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 				x11_echo512_cpu_hash_64(thr_id, throughput, pdata[19], NULL, d_hash[thr_id], order++);
 				TRACE("echo   :");
 				break;
-#endif
 			}
 		}
 
@@ -575,28 +555,20 @@ extern "C" int scanhash_timetravel10(int thr_id, struct work* work, uint32_t max
 				pdata[19] = work->nonces[0];
 				if (work->nonces[1] != 0) {
 					be32enc(&endiandata[19], work->nonces[1]);
-					timetravel10_hash(vhash, endiandata);
-					if (vhash[7] <= Htarg && fulltest(vhash, ptarget)) {
-						bn_set_target_ratio(work, vhash, 1);
-						work->valid_nonces++;
-					}
+					bn_set_target_ratio(work, vhash, 1);
+					work->valid_nonces++;
 					pdata[19] = max(pdata[19], work->nonces[1]) + 1;
 				}
 				return work->valid_nonces;
-			} else if (vhash[7] > Htarg) {
-				gpulog(LOG_WARNING, thr_id, "result for %08x does not validate on CPU!", work->nonces[0]);
-				pdata[19] = work->nonces[0] + 1;
-				continue;
 			}
 		}
 
-		if ((uint64_t) throughput + pdata[19] >= max_nonce) {
+		if ((uint64_t)throughput + pdata[19] >= max_nonce) {
 			pdata[19] = max_nonce;
 			break;
 		}
 		pdata[19] += throughput;
-
-	} while (!work_restart[thr_id].restart);
+	}
 
 	*hashes_done = pdata[19] - first_nonce;
 	return 0;
@@ -608,15 +580,11 @@ extern "C" void free_timetravel10(int thr_id)
 	if (!init[thr_id])
 		return;
 
-	cudaThreadSynchronize();
-
 	cudaFree(d_hash[thr_id]);
 
 	quark_blake512_cpu_free(thr_id);
 	quark_groestl512_cpu_free(thr_id);
-#if HASH_FUNC_COUNT > 8
 	x11_simd512_cpu_free(thr_id);
-#endif
 	cuda_check_cpu_free(thr_id);
 	init[thr_id] = false;
 
