@@ -16,6 +16,7 @@ enum sha_algos {
 	ALGO_DEEP,
 	ALGO_DECRED,
 	ALGO_DMD_GR,
+	ALGO_EQUIHASH,
 	ALGO_FRESH,
 	ALGO_FUGUE256,		/* Fugue256 */
 	ALGO_GROESTL,
@@ -46,6 +47,7 @@ enum sha_algos {
 	ALGO_S3,
 	ALGO_TIMETRAVEL,
 	ALGO_TIMETRAVEL10,
+	ALGO_BITCORE,
 	ALGO_X11EVO,
 	ALGO_X11,
 	ALGO_X13,
@@ -77,6 +79,7 @@ static const char *algo_names[] = {
 	"deep",
 	"decred",
 	"dmd-gr",
+	"equihash",
 	"fresh",
 	"fugue256",
 	"groestl",
@@ -107,6 +110,7 @@ static const char *algo_names[] = {
 	"s3",
 	"timetravel",
 	"timetravel10",
+	"bitcore",
 	"x11evo",
 	"x11",
 	"x13",
@@ -147,6 +151,8 @@ static inline int algo_to_int(char* arg)
 			i = ALGO_C11;
 		else if (!strcasecmp("diamond", arg))
 			i = ALGO_DMD_GR;
+		else if (!strcasecmp("equi", arg))
+			i = ALGO_EQUIHASH;
 		else if (!strcasecmp("doom", arg))
 			i = ALGO_LUFFA;
 		else if (!strcasecmp("hmq17", arg))
@@ -161,6 +167,8 @@ static inline int algo_to_int(char* arg)
 			i = ALGO_SHA256D;
 		else if (!strcasecmp("thorsriddle", arg))
 			i = ALGO_VELTOR;
+		else if (!strcasecmp("timetravel10", arg))
+			i = ALGO_BITCORE;
 		else if (!strcasecmp("whirl", arg))
 			i = ALGO_WHIRLPOOL;
 		else if (!strcasecmp("ziftr", arg))

@@ -223,59 +223,61 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the hash algorithm to use\n\
-			bastion     Hefty bastion\n\
-			blake       Blake 256 (SFR)\n\
-			blake2s     Blake2-S 256 (NEVA)\n\
-			blakecoin   Fast Blake 256 (8 rounds)\n\
-			bmw         BMW 256\n\
-			cryptolight AEON cryptonight (MEM/2)\n\
-			cryptonight XMR cryptonight\n\
-			c11/flax    X11 variant\n\
-			decred      Decred Blake256\n\
-			deep        Deepcoin\n\
-			dmd-gr      Diamond-Groestl\n\
-			fresh       Freshcoin (shavite 80)\n\
-			fugue256    Fuguecoin\n\
-			groestl     Groestlcoin\n\
-			heavy       Heavycoin\n\
-			hmq1725     Doubloons / Espers\n\
-			jackpot     Jackpot\n\
-			keccak      Keccak-256 (Maxcoin)\n\
-			lbry        LBRY Credits (Sha/Ripemd)\n\
-			luffa       Joincoin\n\
-			lyra2       CryptoCoin\n\
-			lyra2v2     VertCoin\n\
-			lyra2z      ZeroCoin (3rd impl)\n\
-			mjollnir    Mjollnircoin\n\
-			myr-gr      Myriad-Groestl\n\
-			neoscrypt   FeatherCoin, Phoenix, UFO...\n\
-			nist5       NIST5 (TalkCoin)\n\
-			penta       Pentablake hash (5x Blake 512)\n\
-			quark       Quark\n\
-			qubit       Qubit\n\
-			sha256d     SHA256d (bitcoin)\n\
-			sha256t     SHA256 x3\n\
-			sia         SIA (Blake2B)\n\
-			sib         Sibcoin (X11+Streebog)\n\
-			scrypt      Scrypt\n\
-			scrypt-jane Scrypt-jane Chacha\n\
-			skein       Skein SHA2 (Skeincoin)\n\
-			skein2      Double Skein (Woodcoin)\n\
-			s3          S3 (1Coin)\n\
-			timetravel  Machinecoin permuted x8\n\
-			timetravel10  BitCore\n\
-			vanilla     Blake256-8 (VNL)\n\
-			veltor      Thorsriddle streebog\n\
-			whirlcoin   Old Whirlcoin (Whirlpool algo)\n\
-			whirlpool   Whirlpool algo\n\
-			x11evo      Permuted x11 (Revolver)\n\
-			x11         X11 (DarkCoin)\n\
-			x13         X13 (MaruCoin)\n\
-			x14         X14\n\
-			x15         X15\n\
-			x17         X17\n\
-			wildkeccak  Boolberry\n\
-			zr5         ZR5 (ZiftrCoin)\n\
+			bastion			Hefty bastion\n\
+			bitcore			Timetravel-10\n\
+			blake			Blake 256 (SFR)\n\
+			blake2s			Blake2-S 256 (NEVA)\n\
+			blakecoin		Fast Blake 256 (8 rounds)\n\
+			bmw				BMW 256\n\
+			cryptolight		AEON cryptonight (MEM/2)\n\
+			cryptonight		XMR cryptonight\n\
+			c11/flax		X11 variant\n\
+			decred			Decred Blake256\n\
+			deep			Deepcoin\n\
+			equihash		Zcash Equihash\n\
+			dmd-gr			Diamond-Groestl\n\
+			fresh			Freshcoin (shavite 80)\n\
+			fugue256		Fuguecoin\n\
+			groestl			Groestlcoin\n\
+			heavy			Heavycoin\n\
+			hmq1725			Doubloons / Espers\n\
+			jackpot			Jackpot\n\
+			keccak			Keccak-256 (Maxcoin)\n\
+			lbry			LBRY Credits (Sha/Ripemd)\n\
+			luffa			Joincoin\n\
+			lyra2			CryptoCoin\n\
+			lyra2v2			VertCoin\n\
+			lyra2z			ZeroCoin (3rd impl)\n\
+			mjollnir		Mjollnircoin\n\
+			myr-gr			Myriad-Groestl\n\
+			neoscrypt		FeatherCoin, Phoenix, UFO...\n\
+			nist5			NIST5 (TalkCoin)\n\
+			penta			Pentablake hash (5x Blake 512)\n\
+			quark			Quark\n\
+			qubit			Qubit\n\
+			sha256d			SHA256d (bitcoin)\n\
+			sha256t			SHA256 x3\n\
+			sia				SIA (Blake2B)\n\
+			sib				Sibcoin (X11+Streebog)\n\
+			scrypt			Scrypt\n\
+			scrypt-jane		Scrypt-jane Chacha\n\
+			skein			Skein SHA2 (Skeincoin)\n\
+			skein2			Double Skein (Woodcoin)\n\
+			s3				S3 (1Coin)\n\
+			timetravel		Machinecoin permuted x8\n\
+			timetravel10    BitCore\n\
+			vanilla			Blake256-8 (VNL)\n\
+			veltor			Thorsriddle streebog\n\
+			whirlcoin		Old Whirlcoin (Whirlpool algo)\n\
+			whirlpool		Whirlpool algo\n\
+			x11evo			Permuted x11 (Revolver)\n\
+			x11				X11 (DarkCoin)\n\
+			x13				X13 (MaruCoin)\n\
+			x14				X14\n\
+			x15				X15\n\
+			x17				X17\n\
+			wildkeccak		Boolberry\n\
+			zr5				ZR5 (ZiftrCoin)\n\
   -d, --devices         Comma separated list of CUDA devices to use.\n\
                         Device IDs start counting from 0! Alternatively takes\n\
                         string names of your cards like gtx780ti or gt640#2\n\
@@ -612,6 +614,10 @@ static void calc_network_diff(struct work *work)
 	if (opt_algo == ALGO_LBRY) nbits = swab32(work->data[26]);
 	if (opt_algo == ALGO_DECRED) nbits = work->data[29];
 	if (opt_algo == ALGO_SIA) nbits = work->data[11]; // unsure if correct
+	if (opt_algo == ALGO_EQUIHASH) {
+		net_diff = equi_network_diff(work);
+		return;
+	}
 
 	uint32_t bits = (nbits & 0xffffff);
 	int16_t shift = (swab32(nbits) & 0xff); // 0x1c = 28
@@ -828,6 +834,17 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 		memcpy(&submit_work, work, sizeof(struct work));
 		if (!hashlog_already_submittted(submit_work.job_id, submit_work.nonces[idnonce])) {
 			if (rpc2_stratum_submit(pool, &submit_work))
+				hashlog_remember_submit(&submit_work, submit_work.nonces[idnonce]);
+			stratum.job.shares_count++;
+		}
+		return true;
+	}
+
+	if (pool->type & POOL_STRATUM && stratum.is_equihash) {
+		struct work submit_work;
+		memcpy(&submit_work, work, sizeof(struct work));
+		if (!hashlog_already_submittted(submit_work.job_id, submit_work.nonces[idnonce])) {
+			if (equi_stratum_submit(pool, &submit_work))
 				hashlog_remember_submit(&submit_work, submit_work.nonces[idnonce]);
 			stratum.job.shares_count++;
 		}
@@ -1486,6 +1503,7 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 	/* Generate merkle root */
 	switch (opt_algo) {
 		case ALGO_DECRED:
+		case ALGO_EQUIHASH:
 		case ALGO_SIA:
 			// getwork over stratum, no merkle to generate
 			break;
@@ -1544,6 +1562,13 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		memcpy(&work->data[44], &sctx->job.coinbase[sctx->job.coinbase_size-4], 4);
 		sctx->job.height = work->data[32];
 		//applog_hex(work->data, 180);
+	} else if (opt_algo == ALGO_EQUIHASH) {
+		memcpy(&work->data[9], sctx->job.coinbase, 32+32); // merkle [9..16] + reserved
+		work->data[25] = le32dec(sctx->job.ntime);
+		work->data[26] = le32dec(sctx->job.nbits);
+		memcpy(&work->data[27], sctx->xnonce1, sctx->xnonce1_size); // pool extranonce
+		work->data[35] = 0x80;
+		//applog_hex(work->data, 140);
 	} else if (opt_algo == ALGO_LBRY) {
 		for (i = 0; i < 8; i++)
 			work->data[9 + i] = be32dec((uint32_t *)merkle_root + i);
@@ -1596,7 +1621,7 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 
 	pthread_mutex_unlock(&stratum_work_lock);
 
-	if (opt_debug && opt_algo != ALGO_DECRED && opt_algo != ALGO_SIA) {
+	if (opt_debug && opt_algo != ALGO_DECRED && opt_algo != ALGO_EQUIHASH && opt_algo != ALGO_SIA) {
 		uint32_t utm = work->data[17];
 		if (opt_algo != ALGO_ZR5) utm = swab32(utm);
 		char *tm = atime2str(utm - sctx->srvtime_diff);
@@ -1631,9 +1656,15 @@ static bool stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_TIMETRAVEL10:
 			work_set_target(work, sctx->job.diff / (256.0 * opt_difficulty));
 			break;
+		case ALGO_BITCORE:
+			work_set_target(work, sctx->job.diff / (256.0 * opt_difficulty));
+			break;
 		case ALGO_KECCAK:
 		case ALGO_LYRA2:
 			work_set_target(work, sctx->job.diff / (128.0 * opt_difficulty));
+			break;
+		case ALGO_EQUIHASH:
+			work_set_target_equi(work, sctx->job.diff / opt_difficulty);
 			break;
 		default:
 			work_set_target(work, sctx->job.diff / opt_difficulty);
@@ -1809,6 +1840,9 @@ static void *miner_thread(void *userdata)
 		} else if (opt_algo == ALGO_CRYPTOLIGHT || opt_algo == ALGO_CRYPTONIGHT) {
 			nonceptr = (uint32_t*) (((char*)work.data) + 39);
 			wcmplen = 39;
+		} else if (opt_algo == ALGO_EQUIHASH) {
+			nonceptr = &work.data[30]; // 27 is pool extranonce (256bits nonce space)
+			wcmplen = 4+32+32;
 		}
 
 		if (have_stratum) {
@@ -1941,6 +1975,9 @@ static void *miner_thread(void *userdata)
 			nonceptr[1] += 1;
 			nonceptr[2] |= thr_id;
 
+		} else if (opt_algo == ALGO_EQUIHASH) {
+			nonceptr[-1] = thr_id;  // [29]
+			nonceptr[1]++; // optional [31]
 		} else if (opt_algo == ALGO_WILDKECCAK) {
 			//nonceptr[1] += 1;
 		} else if (opt_algo == ALGO_SIA) {
@@ -2134,6 +2171,7 @@ static void *miner_thread(void *userdata)
 			case ALGO_S3:
 			case ALGO_TIMETRAVEL:
 			case ALGO_TIMETRAVEL10:
+			case ALGO_BITCORE:
 			case ALGO_X11EVO:
 			case ALGO_X11:
 			case ALGO_X13:
@@ -2241,6 +2279,9 @@ static void *miner_thread(void *userdata)
 			break;
 		case ALGO_DEEP:
 			rc = scanhash_deep(thr_id, &work, max_nonce, &hashes_done);
+			break;
+		case ALGO_EQUIHASH:
+			rc = scanhash_equihash(thr_id, &work, max_nonce, &hashes_done);
 			break;
 		case ALGO_FRESH:
 			rc = scanhash_fresh(thr_id, &work, max_nonce, &hashes_done);
@@ -2354,6 +2395,9 @@ static void *miner_thread(void *userdata)
 			break;
 		case ALGO_TIMETRAVEL10:
 			rc = scanhash_timetravel10(thr_id, &work, max_nonce, &hashes_done);
+			break;
+		case ALGO_BITCORE:
+			rc = scanhash_bitcore(thr_id, &work, max_nonce, &hashes_done);
 			break;
 		case ALGO_X11EVO:
 			rc = scanhash_x11evo(thr_id, &work, max_nonce, &hashes_done);
@@ -3794,6 +3838,10 @@ int main(int argc, char *argv[])
 	if (opt_algo == ALGO_DECRED || opt_algo == ALGO_SIA) {
 		allow_gbt = false;
 		allow_mininginfo = false;
+	}
+
+	if (opt_algo == ALGO_EQUIHASH) {
+		opt_extranonce = false; // disable subscribe
 	}
 
 	if (opt_algo == ALGO_CRYPTONIGHT || opt_algo == ALGO_CRYPTOLIGHT) {
